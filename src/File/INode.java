@@ -5,7 +5,10 @@ import FileSystem.FileSystem;
 
 import java.nio.ByteBuffer;
 
-// todo:是否有必要再做一个dInode层
+/*
+    todo: 是否有必要再做一个dInode层
+          父节点可以放在indexs数组的最后一个位置
+*/
 
 //关于一个Inode在磁盘上的存储：一个int一字节，这里的具体实现是文件名+iNum+indexs = 64 bytes
 
@@ -13,14 +16,15 @@ import java.nio.ByteBuffer;
 //这里还要做一手inode分配的逻辑
 public class INode {
 //    TODO: 修改type域了...
+//          再看看这里的public合不合适...
 //    INode的类型，1表示目录，2表示文件
-    private int type;
-    private byte[] fileName = new byte[Config.FileNameLen];
+    public int type;
+    public byte[] fileName = new byte[Config.FileNameLen];
 //    i节点编号
-    private int iNum;
+    public int iNum;
 //    如果是目录则代表i节点编号，文件则代表文件块
 //    在这里我们保留了非直接索引的接口，暂未做出实现
-    private int[] indexs = new int[Config.NDirect +1];
+    public int[] indexs = new int[Config.NDirect +1];
 
     public byte[] toBytes(){
         ByteBuffer byteBuffer = ByteBuffer.allocate(64);
@@ -37,8 +41,9 @@ public class INode {
 //    一般用于读取磁盘的i节点信息后生成一个i节点
     public INode(byte[] fileName, int type, int iNum, int[] indexs){
         this.fileName = fileName;
+        this.type = type;
         this.iNum = iNum;
-        this.indexs = indexs;
+        this.indexs = indexs==null? new int[Config.NDirect+1]:indexs;
     }
 
 //    根据文件名创建一个i节点
@@ -50,12 +55,16 @@ public class INode {
     static INode allocateINode(byte[] fileName, int type){
         int inum = FileSystem.getInstance().iallocate();
 
-        return new INode(fileName,type, inum, null);
+//        todo: 这里估计需要把新申请的inode写回磁盘
+        INode nInode =  new INode(fileName,type, inum, null);
+
+        FileSystem.getInstance().writeInode(nInode);
+        return nInode;
     }
 
 //    重载版本
     static void destroyINode(int inum){
-        destroyINode(FileSystem.getInstance().iget(inum));
+        destroyINode(FileSystem.getInstance().readInode(inum));
     }
 //    根据type域分发
     static void destroyINode(INode iNode){
@@ -63,6 +72,7 @@ public class INode {
         if(iNode.type == 1){
             destroyDirINode(iNode);
         }else{
+            assert iNode.type == 2;
             destroyFileINode(iNode);
         }
     }
