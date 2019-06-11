@@ -20,5 +20,9 @@ public class MakeFS {
         boolean[] blockBitmap = new boolean[superBlock.totalBlockNum];
         Arrays.fill(iNodeBitmap, false);
         Arrays.fill(blockBitmap, false);
+
+//        留空首块，一般作为引导块（虽然在我们的系统中不需要）
+//        第一块作为超级块存放
+//        第二块开始作为Inode的位图，紧跟磁盘块的位图
     }
 }

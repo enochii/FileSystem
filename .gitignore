@@ -2,3 +2,5 @@ out/
 *.class
 *.iml
 .idea/
+*.txt
+*.iso
