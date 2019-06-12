@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import File.INode;
+import FileSystem.Config;
 
 public class Main {
 
@@ -26,9 +27,14 @@ public class Main {
         raf.read(buffer);
         System.out.println(buffer);
         System.out.println(new String(buffer));
+
 //
-//        INode iNode = new INode();
-//        byte[] buf = iNode.toBytes();
-//        System.out.println(buf.length);
+        byte[] xi = new byte[20];
+        for (int i = 0;i<20;i++){
+            xi[i] = 'h';
+        }
+        String str = new String(xi);
+
+
     }
 }

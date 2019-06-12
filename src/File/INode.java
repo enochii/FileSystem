@@ -38,25 +38,41 @@ public class INode {
         return byteBuffer.array();
     }
 
+//    需要调用i节点的构造函数：
+//    1. 从磁盘上读取一个i节点信息
+//    2. 新申请一个i节点
+
 //    一般用于读取磁盘的i节点信息后生成一个i节点
-    public INode(byte[] fileName, int type, int iNum, int[] indexs){
+    public INode(byte[] fileName, int type, int inum, int[] indexs){
+        this(fileName, type, inum);
+
+        assert indexs != null;
+        this.indexs = indexs;
+//        this.indexs[Config.NDirect - 1] = father;
+    }
+
+    private INode(byte[] fileName, int type, int inum){
         this.fileName = fileName;
         this.type = type;
-        this.iNum = iNum;
-        this.indexs = indexs==null? new int[Config.NDirect+1]:indexs;
+        this.iNum = inum;
     }
 
 //    根据文件名创建一个i节点
 //    note: 当前目录的文件名查重不在这里做
-    public INode(byte[] fileName){
-        this.fileName = fileName;
+    public INode(byte[] fileName, int type, int inum, int father){
+        this(fileName, type, inum);
+        this.indexs = new int[Config.NDirect + 1];
+//        最后一个节点用于存储父节点
+        this.indexs[Config.NDirect -1] = father;
     }
 
-    static INode allocateINode(byte[] fileName, int type){
+//    这里关于i节点的逻辑都没有处理父节点的indexs，我们留到高层做
+//    也就是create/delete File
+    public static INode allocateINode(byte[] fileName, int type,  int father){
         int inum = FileSystem.getInstance().iallocate();
 
 //        todo: 这里估计需要把新申请的inode写回磁盘
-        INode nInode =  new INode(fileName,type, inum, null);
+        INode nInode =  new INode(fileName, type,inum, father);
 
         FileSystem.getInstance().writeInode(nInode);
         return nInode;
@@ -75,29 +91,34 @@ public class INode {
             assert iNode.type == 2;
             destroyFileINode(iNode);
         }
+        FileSystem.getInstance().irelease(iNode.iNum);
     }
 
 //    删除i节点分两种：文件和目录
 //    目录删除基于文件删除
-    static void destroyDirINode(INode iNode){
+    private static void destroyDirINode(INode iNode){
 //        目录删除要递归删除该目录下的文件和目录
         FileSystem.getInstance().irelease(iNode.iNum);
-        for(int inum = 0;inum<Config.NDirect;inum++){
-            if(iNode.indexs[inum] == 0){
-                break;
+        for(int iindex = 0;iindex<Config.NDirect - 1;iindex++){
+            if(iNode.indexs[iindex] == 0){
+                continue;
             }
-            destroyINode(inum);
+
+            destroyINode(iNode.indexs[iindex]);
+            //这里好像也可以用懒删除，只需要消除位图就可以了...
+            iNode.indexs[iindex] = 0;
         }
+        iNode.indexs[Config.NDirect - 1] = 0;
     }
 
-    static void destroyFileINode(INode iNode){
+    private static void destroyFileINode(INode iNode){
         FileSystem.getInstance().irelease(iNode.iNum);
-        for(int bnum = 0; bnum < Config.NDirect;bnum++){
+        for(int bindex = 0; bindex < Config.NDirect;bindex++){
 //            释放磁盘块
-            if(iNode.indexs[bnum] == 0){
-                break;
+            if(iNode.indexs[bindex] == 0){
+                continue;
             }
-            BlockAllocator.destroyBlock(bnum);
+            BlockAllocator.destroyBlock(iNode.indexs[bindex]);
         }
 //        这里没实现间接索引，暂时留空释放简介索引块的逻辑
     }

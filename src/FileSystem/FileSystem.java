@@ -213,14 +213,18 @@ public class FileSystem {
     }
 
 //    先从Cache尝试读取，不命中再从镜像（磁盘）文件读入
-    Block readOneBlock(int pos){
+    public Block readOneBlock(int pos){
 //    TODO: 这里还可以再做一手缓冲磁盘块的逻辑
         return _readOneBlock(pos);
     }
 
+    public Block readBlockBybnum(int bnum){
+        return readOneBlock((bnum + superBlock.blockStart) * Config.BlockSize);
+    }
+
 //    读出一个磁盘块
 //    在每次读出文件上的信息时，我们一次最少读出一个磁盘块
-    Block _readOneBlock(int pos){
+    private static final  Block _readOneBlock(int pos){
 //        TODO: 考虑地址对齐的逻辑
         assert pos % Config.BlockSize == 0;
         pos -= pos % Config.BlockSize;

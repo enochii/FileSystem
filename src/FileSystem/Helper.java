@@ -7,4 +7,5 @@ public class Helper {
         System.err.println(msg);
         e.printStackTrace();
     }
+//    todo: 地址转换接口 inum/bnum ->  disk address
 }

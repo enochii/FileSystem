@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 // Block是对一个磁盘块的缓冲，事实上block是对ByteBuffer的包装
 public class Block {
 //    private int blocksize;
-    //默认认为一个磁盘块为512 KB
+    //磁盘块大小
     byte[] buffer;
 //    ByteBuffer byteBuffer; //缓冲区
     int bnum = -1; // 磁盘块号
