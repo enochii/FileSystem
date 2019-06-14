@@ -30,11 +30,18 @@ public class File {
     public INode getINode(){
         return iNode;
     }
+    private void setiNode(INode inode){
+        this.iNode = inode;
+    }
+
+    public void updateInode(){
+        setiNode(FileSystem.getInstance().readInode(iNode.iNum));
+    }
 
 //    文件内容
     String content;
 //    目录项
-    List<Dirent> dirents;
+//    List<Dirent> dirents;
 
 //    获取文件内容
     public String getContent(){
@@ -61,18 +68,23 @@ public class File {
 //    获取目录项
     public List<Dirent> getDirents(){
         assert iNode!=null && iNode.type == 1;
+//        System.out.println(iNode.iNum+" "+new String(iNode.filename));
 
         List<Dirent> dirents = new ArrayList<Dirent>();
         for(int i=0;i<Config.NDirect - 1;i++){
+            if(iNode.indexs[i] == 0)continue;
+//            TEST
+//            System.out.println(i+" "+iNode.indexs[i]);
             INode inode = FileSystem.getInstance().readInode(iNode.indexs[i]);
+            if(inode==null)continue;//懒删除的文件？
             dirents.add(new Dirent(iNode.indexs[i], inode.filename));
         }
 
-        return null;
+        return dirents;
     }
 
-    public static INode createFile(byte[] filename, int type, INode inode){
-        return createFile(filename, type, inode.iNum);
+    public static INode createFile(byte[] filename, int type, INode ifa){
+        return createFile(filename, type, ifa.iNum);
     }
 
 //    创建新文件或者文件夹，返回i节点
@@ -93,7 +105,11 @@ public class File {
         }
         ifa.indexs[insertIndex] = child.iNum;
 
+//        TEST
+//        System.out.println("Child " + child.iNum + "Inserted in " + insertIndex + "of "+father);
+
         fs.writeInode(ifa);
+//        System.out.println("Create file in " + ifa.iNum);
 
         return child;
     }

@@ -4,6 +4,7 @@ package Controller;
 
 import File.File;
 import FileSystem.FileSystem;
+import FileSystem.MakeFS;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,14 +20,23 @@ public class Controller {
     File curDir; // 用户当前所处的目录
     boolean mode = CMD;
 
+    public Controller(){
+//        MakeFS.main();
+
+//        curDir = new File(FileSystem.getInstance().getRoot());
+//        System.out.println("Root: "+ new String(curDir.getINode().filename));
+    }
+
     public void main() throws IOException {
         BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 
         while (true){
-            System.out.print("sch001-fs>");
+            System.out.print("sch001-fs> ");
             String cmd = console.readLine();
 
-            CommandParser.parse(cmd, this).excute(this);
+            Command command = CommandParser.parse(cmd, this);
+            command.excute(this);
+            curDir.updateInode();
         }
 
     }

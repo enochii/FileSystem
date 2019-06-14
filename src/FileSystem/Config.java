@@ -12,9 +12,9 @@ public class Config {
 //    文件名的最大长度
     public final static int FileNameLen = 16;
 //    文件直接索引数
-    public final static int NDirect = 10;
-//    Inode的大小
-    public final static int InodeSize  = FileNameLen + (1+NDirect+1)* 4;
+    public final static int NDirect = 9;
+//    Inode的大小: filename, type, inum, NDirect, INDirect
+    public final static int InodeSize  = FileNameLen + (1+ 1+ NDirect+1)* 4;
 
     public final static int IntSize = 4;
 }

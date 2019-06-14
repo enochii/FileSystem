@@ -4,6 +4,8 @@ import File.File;
 
 import java.util.List;
 import File.Dirent;
+import FileSystem.FileSystem;
+import FileSystem.MakeFS;
 
 public interface Command {
     public void excute(Controller controller);
@@ -19,8 +21,12 @@ class ls implements Command{
         List<Dirent> dirents = dir.getDirents();
 
         if(controller.mode == Controller.CMD){
+//            System.out.println(dirents.size());
             for(int i = 0;i<dirents.size();i++){
-                System.out.println(dirents.get(i).filename + " ");
+                System.out.print(dirents.get(i).filename + " ");
+            }
+            if(dirents.size()>0){
+                System.out.println();
             }
         }
     }
@@ -49,5 +55,14 @@ class mkdir implements Command{
     public void excute(Controller controller){
         assert dirname != null;
         File.createFile(dirname.getBytes(),File.FILE,controller.curDir.getINode());
+    }
+}
+
+class mkfs implements Command{
+    @Override
+    public void excute(Controller controller){
+        MakeFS.main();
+//      重置根目录
+        controller.curDir = new File(FileSystem.getInstance().getRoot());
     }
 }

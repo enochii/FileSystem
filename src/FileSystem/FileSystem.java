@@ -32,25 +32,27 @@ public class FileSystem {
 //    通过storage来访问镜像文件
     private static RandomAccessFile storage;
 //    全局的单例对象
-    private static FileSystem instance = new FileSystem();
+    private static FileSystem instance;
 
 //    final int inodeStart; // i节点的开始偏移
 //    final int blockStart; // 磁盘块的开始偏移
 
 //    对外开放的接口
     static public FileSystem getInstance(){
-        assert instance != null;
+        if(instance == null){
+            instance = new FileSystem();
+        }
         return instance;
     }
 
 //    存储元信息
-    private static SuperBlock superBlock;
+    static SuperBlock superBlock;
 
     private boolean[] iNodeBitmap;
     private boolean[] blockBitmap;
 
     static void initFS(){
-        image  = new File("fs.iso");
+        image  = new File("test.txt");
         try {
             storage = new RandomAccessFile(image, "rw");
         } catch (FileNotFoundException e) {
@@ -67,11 +69,11 @@ public class FileSystem {
         initFS();
 
 //        位图，0表示空闲，1表示已经被占据
-//        TODO: 设置allocatedBlockNum（好像不用）
-//              这里的逻辑感觉
+//
+        superBlock = readSuperBlock();
         iNodeBitmap = readInodeBitmap();
         blockBitmap = readBlockBitmap();
-        superBlock = readSuperBlock();
+
 //        计算偏移
 //        inodeStart = Config.BlockSize * 2 + uptoBlockSize(superBlock.totalINodeNum) + uptoBlockSize(superBlock.totalBlockNum);
 //        blockStart = inodeStart + uptoBlockSize(superBlock.totalINodeNum * Config.InodeSize);
@@ -150,7 +152,7 @@ public class FileSystem {
         boolean[] inodeBitmap = new boolean[superBlock.totalINodeNum];
 //        跳过两个块就开始读
         try {
-            storage.seek(Config.BlockSize * superBlock.iNodeStart );
+            storage.seek(Config.BlockSize * superBlock.iBitmapStart );
         } catch (IOException e) {
             Helper.handleIOE(e, "Can not seek the address of Inode Bitmap!");
         }
@@ -158,7 +160,7 @@ public class FileSystem {
         int inum = -1;
         try{
             for(inum = 0;inum < superBlock.totalINodeNum; inum++) {
-                blockBitmap[inum] = storage.readBoolean();
+                inodeBitmap[inum] = storage.readBoolean();
             }
         }catch (IOException e){
             Helper.handleIOE(e, "Can not read "+ inum +"th Inode bit.");
@@ -170,7 +172,7 @@ public class FileSystem {
 //    写位图的逻辑，要写的东西也太多了...
     private static void writeInodeBitmap(boolean[] iBitmap){
         try {
-            storage.seek(Config.BlockSize * superBlock.iNodeStart );
+            storage.seek(Config.BlockSize * superBlock.iBitmapStart );
         } catch (IOException e) {
             Helper.handleIOE(e, "Can not seek the address of Inode Bitmap!");
         }
@@ -188,7 +190,7 @@ public class FileSystem {
 
     private static void writeBlockBitmap(boolean[] bBitmap){
         try {
-            storage.seek(Config.BlockSize * superBlock.blockStart );
+            storage.seek(Config.BlockSize * superBlock.bBitmapStart );
         } catch (IOException e) {
             Helper.handleIOE(e, "Can not seek the address of Block Bitmap!");
         }
@@ -206,7 +208,7 @@ public class FileSystem {
 
 //
     boolean[] readBlockBitmap(){
-        boolean[] blockBitmap = new boolean[superBlock.totalINodeNum];
+        boolean[] blockBitmap = new boolean[superBlock.totalBlockNum];
 //        跳过两个块和i节点位图
         try {
             storage.seek(superBlock.bBitmapStart);
@@ -226,9 +228,8 @@ public class FileSystem {
         return blockBitmap;
     }
 
-//    先从Cache尝试读取，不命中再从镜像（磁盘）文件读入
-    public Block readOneBlock(int pos){
-//    TODO: 这里还可以再做一手缓冲磁盘块的逻辑
+//   todo: 先从Cache尝试读取，不命中再从镜像（磁盘）文件读入
+    public static Block readOneBlock(int pos){
         return _readOneBlock(pos);
     }
 
@@ -238,11 +239,13 @@ public class FileSystem {
 
 //    读出一个磁盘块
 //    在每次读出文件上的信息时，我们一次最少读出一个磁盘块
-    private static final  Block _readOneBlock(int pos){
+    private static  Block _readOneBlock(int pos){
 //        TODO: 考虑地址对齐的逻辑
         assert pos % Config.BlockSize == 0;
         pos -= pos % Config.BlockSize;
         try {
+            // TEST
+//            System.out.println("read Block " + pos / Config.BlockSize);
             storage.seek(pos);
         } catch (IOException e) {
             Helper.handleIOE(e, "Can not seek the address" + pos);
@@ -273,9 +276,11 @@ public class FileSystem {
     }
 
     private static void _writeBlock(Block block){
-        int pos = superBlock.blockStart * Config.BlockSize + block.bnum * Config.BlockSize;
+        int pos = block.bnum * Config.BlockSize;
         assert pos % Config.BlockSize == 0;
         try {
+//            TEST
+//            System.out.println("write Block " + pos / Config.BlockSize);
             storage.seek(pos);
         } catch (IOException e) {
             Helper.handleIOE(e, "Can not seek to write back block");
@@ -287,8 +292,8 @@ public class FileSystem {
         }
     }
 
-/*    TODO: 退出时把内存中文件系统的信息写进磁盘
-            记得在用户强制关闭窗口也要调用safeExit
+/*      退出时把内存中文件系统的信息写进磁盘
+        记得在用户强制关闭窗口也要调用safeExit
   */
     public void safeExit(){
         FileSystem.ReWriteFS(superBlock, iNodeBitmap, blockBitmap, null);
@@ -297,6 +302,9 @@ public class FileSystem {
 //    读取特定编号的Inode
     public INode readInode(int inum){
         assert inum < superBlock.totalINodeNum;
+        if(!iNodeBitmap[inum]){
+            return null;
+        }
 
 //        该i节点在磁盘上第一个i节点地址的偏移量
         int offset = inum * Config.InodeSize;
@@ -305,9 +313,14 @@ public class FileSystem {
 
         ByteBuffer byteBuffer = block.getByteBuffer();
 
-//        done :这里有问题，没有定位i节点 -- ok了
+//        定位i节点
         // file name(16), iNum(4), indexs(4*11)
         offset = offset % Config.BlockSize; //修改偏移量为当前单个磁盘块的位移
+
+        byte[] filename = new byte[Config.FileNameLen];
+        for(int i=0;i<filename.length;i++){
+            filename[i] = byteBuffer.array()[i + offset];
+        }
 
         int type = byteBuffer.getInt(offset + Config.FileNameLen);
         int iNum = byteBuffer.getInt(offset + Config.FileNameLen + Config.IntSize);
@@ -315,30 +328,37 @@ public class FileSystem {
         int[] indexs = new int[Config.NDirect + 1];
         for(int i = 0;i < Config.NDirect + 1;i++){
             indexs[i] = byteBuffer.getInt(offset + Config.FileNameLen + (i+2)*Config.IntSize);
+            if(indexs[i]!=0){
+                //        TEST
+//                System.out.println(new String(filename)+ " " + type +" "+ iNum+" Occupied: "+i);
+            }
         }
-        byte[] filename = new byte[Config.FileNameLen];
-        for(int i=0;i<byteBuffer.array().length;i++){
-            filename[i] = byteBuffer.array()[i + offset];
-        }
+
 
         return new INode(filename, type, iNum, indexs);
     }
 
-//    todo: 写入i节点，这里就算写入一个i节点也要写入一个磁盘块
-//          大概这就是为啥需要加个BlockCache层的原因吧...
-    public void writeInode(INode inode){
-        System.err.println("Please do me!");
+//     写入i节点，这里就算写入一个i节点也要写入一个磁盘块
+//    大概这就是为啥需要加个BlockCache层的原因吧...
+    public static void writeInode(INode inode){
+//        System.err.println("Please do me!");
 
         int offset = inode.iNum * Config.InodeSize;
         int pos = superBlock.iNodeStart * Config.BlockSize + offset;
+//        TEST
+//        System.out.println("POS: " + pos/Config.BlockSize);
         Block block = readOneBlock(pos);
+        assert block.bnum == pos/Config.BlockSize;
 
-        pos = pos % Config.BlockSize;
+        offset = offset % Config.BlockSize;
 //        修改该block的内容
         byte[] bytes = block.getByteBuffer().array();
         byte[] inodeBytes = inode.toBytes();
+//        System.out.println("Inode Size: "+inodeBytes.length);
+//        TEST
+//        System.out.println(inode.indexs[5]);
         for(int i = 0;i < Config.InodeSize;i++){
-            bytes[i + pos] = inodeBytes[i];
+            bytes[i + offset] = inodeBytes[i];
         }
         block.setBuffer(bytes);
 //        写回磁盘
@@ -369,7 +389,7 @@ public class FileSystem {
 class SuperBlock{
     int totalINodeNum ;
     int totalBlockNum ;
-    //todo: 加入以下元信息
+
 //    int dataBlockNum; // 数据块的块数
 
 //    以下均为磁盘块号

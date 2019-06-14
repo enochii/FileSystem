@@ -26,8 +26,8 @@ public class INode {
     public int[] indexs = new int[Config.NDirect +1];
 
     public byte[] toBytes(){
-        ByteBuffer byteBuffer = ByteBuffer.allocate(64);
-        byteBuffer.put(filename);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Config.InodeSize);
+        byteBuffer.put(filename,0,Config.FileNameLen);
         byteBuffer.putInt(type);
         byteBuffer.putInt(iNum);
         for(int i=0;i<Config.NDirect+1;i++){
@@ -51,7 +51,15 @@ public class INode {
     }
 
     private INode(byte[] filename, int type, int inum){
-        this.filename = filename;
+//        System.out.println("Filename Length: "+ filename.length);
+        for(int i = 0;i<Config.FileNameLen;i++){
+            if(i<filename.length){
+                this.filename[i] = filename[i];
+            }else{
+                this.filename[i] = 0;
+            }
+        }
+//        this.filename = filename;
         this.type = type;
         this.iNum = inum;
     }

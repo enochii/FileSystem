@@ -4,6 +4,8 @@ package Controller;
 //          6.makefs    7.edit      8.rename
 //
 
+import File.File;
+import FileSystem.FileSystem;
 import FileSystem.MakeFS;
 
 public class CommandParser {
@@ -23,7 +25,7 @@ public class CommandParser {
             case "mkdir":
                 command = new mkdir(words[1]);
             case "mkfs":
-                MakeFS.main();
+                command = new mkfs();
                 break;
                 default:
                     System.err.print("Invalid command!");

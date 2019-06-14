@@ -28,11 +28,14 @@ public class MakeFS {
 //        int[] indexs = new int[Config.NDirect];
 //        byte[] rootName = new String("root").getBytes();
 
+//        初始化静态成员
+        FileSystem.initFS();
+        FileSystem.superBlock = superBlock;
 
-        INode root = new INode("root".getBytes(), 1, 0, -1);
-        FileSystem fs = FileSystem.getInstance();
+        INode root = new INode("root".getBytes(), 1, 0, -1000000);
+//        FileSystem fs = FileSystem.getInstance();
 //        写入第一个i节点作为根目录
-        fs.writeInode(root);
+        FileSystem.writeInode(root);
 
         // 填i节点位图
         iNodeBitmap[0] = true;
@@ -47,8 +50,11 @@ public class MakeFS {
             blockBitmap[bnum] = true;
         }
 
-        FileSystem.initFS();
-        FileSystem.ReWriteFS(new SuperBlock(), iNodeBitmap, blockBitmap, null);
+
+        FileSystem.ReWriteFS(superBlock, iNodeBitmap, blockBitmap, null);
+
+//        System.out.println("root".getBytes());
+//        System.out.println("Root: " + FileSystem.getInstance().getRoot().filename);
     }
 
 
