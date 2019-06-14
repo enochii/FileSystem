@@ -10,20 +10,25 @@ import FileSystem.FileSystem;
 import FileSystem.Config;
 import FileSystem.Block;
 
+import java.util.ArrayList;
 import java.util.List;
 
-// 索引项
-class Dirent{
-    int iNum;
-    String filename;
-}
 
 public class File {
+
+    public final static int DIR = 1;
+    public final static int FILE = 2;
+
+
     INode iNode;
 
     public File(INode inode){
         assert inode != null;
         iNode = inode;
+    }
+
+    public INode getINode(){
+        return iNode;
     }
 
 //    文件内容
@@ -32,7 +37,7 @@ public class File {
     List<Dirent> dirents;
 
 //    获取文件内容
-    String getContent(){
+    public String getContent(){
         assert iNode!=null && iNode.type == 2;
 
 //        content = "";
@@ -42,7 +47,7 @@ public class File {
                 continue; //删除文件可能会使中间留空
             }
             Block block = FileSystem.getInstance().readBlockBybnum(iNode.indexs[bindex]);
-//            todo: 我真的不会
+//
             stringBuffer.append(block.getByteBuffer().toString());
         }
 
@@ -54,15 +59,26 @@ public class File {
 //    }
 
 //    获取目录项
-    List<Dirent> getDirents(int iNum){
+    public List<Dirent> getDirents(){
         assert iNode!=null && iNode.type == 1;
+
+        List<Dirent> dirents = new ArrayList<Dirent>();
+        for(int i=0;i<Config.NDirect - 1;i++){
+            INode inode = FileSystem.getInstance().readInode(iNode.indexs[i]);
+            dirents.add(new Dirent(iNode.indexs[i], inode.filename));
+        }
+
         return null;
     }
 
+    public static INode createFile(byte[] filename, int type, INode inode){
+        return createFile(filename, type, inode.iNum);
+    }
+
 //    创建新文件或者文件夹，返回i节点
-    public static INode createFile(byte[] fileName, int type, int father){
+    public static INode createFile(byte[] filename, int type, int father){
         // 创建新文件
-        INode child = INode.allocateINode(fileName, type, father);
+        INode child = INode.allocateINode(filename, type, father);
 
         // 把新文件加入父目录
         FileSystem fs = FileSystem.getInstance();

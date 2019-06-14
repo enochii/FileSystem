@@ -22,6 +22,10 @@ public class Block {
         return ByteBuffer.wrap(buffer);
     }
 
+    public void setBuffer(byte[] bytes){
+        buffer = bytes;
+    }
+
     public int getBnum(){
         return bnum;
     }
