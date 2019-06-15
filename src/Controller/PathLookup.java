@@ -21,13 +21,15 @@ public class PathLookup {
     }
 
 //    在dir目录下找出文件名为filename的文件
-    public static INode lookupInDir(String filename, File dir){
+    public static Dirent lookupInDir(String filename, File dir){
         assert dir.getINode().type == 1;
 
         List<Dirent> dirents = dir.getDirents();
         for(int i = 0;i<dirents.size();i++){
-            if(filename.equals(dirents.get(i).filename)){
-                return FileSystem.getInstance().readInode(dirents.get(i).iNum);
+            Dirent dirent = dirents.get(i);
+//            System.out.println(dirent.filename);
+            if(filename.equals(dirent.filename)){
+                return dirent;
             }
         }
 
@@ -46,7 +48,8 @@ public class PathLookup {
 
         assert curDir != null;
         for(int i = 1;i<path.length;i++){
-            INode inode = lookupInDir(path[i], curDir);
+            Dirent dirent = lookupInDir(path[i], curDir);
+            INode inode = FileSystem.getInstance().readInode(dirent.iNum);
 //            文件需作为路径的最后一个分割符出现
             if(inode.type == File.FILE && i != path.length - 1){
                 System.err.println("Invalid Path, "+inode.filename + "is not a dir");

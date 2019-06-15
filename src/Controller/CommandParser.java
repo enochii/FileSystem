@@ -27,11 +27,35 @@ public class CommandParser {
             case "mkfs":
                 command = new mkfs();
                 break;
+            case "view":
+                command = new view(words[1]);
+                break;
+            case "echo":
+                command = new echo(words[1], words[2]);
+                break;
+            case "rmdir":
+            case "rm":
+                command = new rm(words[1]);
+                break;
+            case "exit":
+                FileSystem.getInstance().safeExit();
+                command = new printInfo("Exit...\n");
+                break;
+
+            case "append":
+            case "help":
+                command = new printInfo(getHelp());
+                break;
                 default:
-                    System.err.print("Invalid command!");
+                    command = new printInfo("Invalid command! You can type \"help\" to get more information.\n");
         }
 
         return command;
+    }
+
+    private static String getHelp(){
+        return "help message:\n" +
+                "";
     }
 }
 

@@ -38,8 +38,9 @@ public class File {
         setiNode(FileSystem.getInstance().readInode(iNode.iNum));
     }
 
+//    由于刷新问题暂时没做缓存文件内容和目录的缓存
 //    文件内容
-    String content;
+//    String content;
 //    目录项
 //    List<Dirent> dirents;
 
@@ -48,17 +49,18 @@ public class File {
         assert iNode!=null && iNode.type == 2;
 
 //        content = "";
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuffer = new StringBuilder();
         for (int bindex = 0;bindex < Config.NDirect - 1;bindex++){
-            if(iNode.indexs[bindex] == 0){
-                continue; //删除文件可能会使中间留空
+            if(iNode.indexs[bindex] < FileSystem.getDataBlockStart()){
+                break; // 有磁盘块为空后面没内容了应该
             }
             Block block = FileSystem.getInstance().readBlockBybnum(iNode.indexs[bindex]);
+//            System.out.println("Block Index " + iNode.indexs[bindex] + new String(block.getByteBuffer().array()));
 //
-            stringBuffer.append(block.getByteBuffer().toString());
+            stringBuffer.append(new String(block.getByteBuffer().array()));
         }
 
-        return content = stringBuffer.toString();
+        return stringBuffer.toString();
     }
 
 //    void setContent(String _content){
@@ -123,7 +125,7 @@ public class File {
         assert totalBytes < (Config.NDirect - 1)*Config.BlockSize;
         int blockNeedtoWrite = FileSystem.blockNum(totalBytes);
 
-        content = newContent;
+//        content = newContent;
 
         FileSystem fs = FileSystem.getInstance();
 
@@ -131,12 +133,17 @@ public class File {
             if(bindex >= blockNeedtoWrite){
                 break;
             }
-            String substr = newContent.substring(bindex*Config.BlockSize, (bindex+1)*Config.BlockSize);
+            int end = Math.min(totalBytes, (bindex+1)*Config.BlockSize);
+            String substr = newContent.substring(bindex*Config.BlockSize, end);
+
 
             if(iNode.indexs[bindex] == 0){
                 iNode.indexs[bindex] = fs.ballocate();
+//                System.out.println(iNode.indexs[bindex]);
             }
             fs.writeBlock(new Block(substr.getBytes(), iNode.indexs[bindex]));
+//            System.out.println(substr + iNode.indexs[bindex]);
+            fs.writeInode(iNode);
         }
     }
 

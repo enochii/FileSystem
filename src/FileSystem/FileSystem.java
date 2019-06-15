@@ -105,12 +105,14 @@ public class FileSystem {
     public int ballocate(){
         for(int bnum=0;bnum<Config.TotalBlockNum;bnum++){
             if(!blockBitmap[bnum]){
+//                TEST
+//                System.out.println("Block Allocate: " + bnum);
                 blockBitmap[bnum] = true;
                 if(superBlock.allocatedBlockNum <= bnum){
 //                TODO: 在这里要申请物理磁盘块
 
                     superBlock.allocatedBlockNum ++;
-                    System.out.println("Please implement me!");
+//                    System.out.println("Please implement me!");
                 }
                 return bnum;
             }
@@ -211,7 +213,7 @@ public class FileSystem {
         boolean[] blockBitmap = new boolean[superBlock.totalBlockNum];
 //        跳过两个块和i节点位图
         try {
-            storage.seek(superBlock.bBitmapStart);
+            storage.seek(superBlock.bBitmapStart * Config.BlockSize);
         } catch (IOException e) {
             Helper.handleIOE(e, "Can not read Block Bitmap!");
         }
@@ -234,7 +236,7 @@ public class FileSystem {
     }
 
     public Block readBlockBybnum(int bnum){
-        return readOneBlock((bnum + superBlock.blockStart) * Config.BlockSize);
+        return readOneBlock(bnum * Config.BlockSize);
     }
 
 //    读出一个磁盘块
@@ -243,6 +245,8 @@ public class FileSystem {
 //        TODO: 考虑地址对齐的逻辑
         assert pos % Config.BlockSize == 0;
         pos -= pos % Config.BlockSize;
+
+
         try {
             // TEST
 //            System.out.println("read Block " + pos / Config.BlockSize);
@@ -383,6 +387,10 @@ public class FileSystem {
 //        写入位图
         writeInodeBitmap(iNodeBitmap);
         writeBlockBitmap(blockBitmap);
+    }
+
+    public static int getDataBlockStart(){
+        return superBlock == null? 0 : superBlock.blockStart;
     }
 }
 

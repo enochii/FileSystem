@@ -23,7 +23,7 @@ public class Controller {
     public Controller(){
 //        MakeFS.main();
 
-//        curDir = new File(FileSystem.getInstance().getRoot());
+        curDir = new File(FileSystem.getInstance().getRoot());
 //        System.out.println("Root: "+ new String(curDir.getINode().filename));
     }
 
@@ -31,7 +31,7 @@ public class Controller {
         BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 
         while (true){
-            System.out.print("sch001-fs> ");
+            System.out.print("schell> ");
             String cmd = console.readLine();
 
             Command command = CommandParser.parse(cmd, this);
