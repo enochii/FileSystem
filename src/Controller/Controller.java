@@ -36,8 +36,20 @@ public class Controller {
 
             Command command = CommandParser.parse(cmd, this);
             command.excute(this);
+
             curDir.updateInode();
+
+            if(command.getClass() == printInfo.class){
+                printInfo pcmd = (printInfo)command;
+                if(pcmd.type == printInfo.EXIT){
+                    break;
+                }
+            }
+
         }
+
+//        保存文件系统元信息
+        FileSystem.getInstance().safeExit();
 
     }
 

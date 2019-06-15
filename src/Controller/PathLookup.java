@@ -5,7 +5,7 @@ package Controller;
 import File.File;
 import File.INode;
 import FileSystem.FileSystem;
-//import FileSystem.Config;
+import FileSystem.Config;
 import File.Dirent;
 
 import java.util.List;
@@ -37,17 +37,31 @@ public class PathLookup {
         return null;
     }
 
-//    './'表示相对路径,'root/xxx/'表示相对路径.在我们的系统中根目录为root
+//    todo: 这里还少了".."和比较直观的相对路径
+//    './'表示相对路径,'root/xxx/'表示绝对路径.在我们的系统中根目录为root
     public static INode pathLookup(File curDir, String _path){
         String[] path = splitPathname(_path);
 //        File startDir = null;
-        assert path[0].equals(".") || path[0].equals("root");
-        if(path[0].equals(".")){
+//        assert path[0].equals(".") || path[0].equals("root");
+
+        if(path[0].equals("..")){
+            if(path.length > 1){
+                System.out.println("Ignore the part after \"..\"");
+            }
+            return getFather(curDir);
+        }
+
+        if(path[0].equals("root")){
             curDir = new File(FileSystem.getInstance().getRoot());
         }
 
+        int startIndex = 1;
+        if(!path[0].equals(".")&&!path[0].equals("root")){
+            startIndex = 0;
+        }
+
         assert curDir != null;
-        for(int i = 1;i<path.length;i++){
+        for(int i = startIndex;i<path.length;i++){
             Dirent dirent = lookupInDir(path[i], curDir);
             INode inode = FileSystem.getInstance().readInode(dirent.iNum);
 //            文件需作为路径的最后一个分割符出现
@@ -58,5 +72,12 @@ public class PathLookup {
         }
 
         return curDir.getINode();
+    }
+
+//    获取父目录
+//    这里一个比较hack的想法是把["..", faInum]存入dirents数组，但是有点...
+    public static INode getFather(File curDir){
+        int ifa = curDir.getINode().indexs[Config.NDirect - 1];
+        return FileSystem.getInstance().readInode(ifa);
     }
 }

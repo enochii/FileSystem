@@ -15,6 +15,7 @@ public class CommandParser {
 
         switch (words[0]){
             case "cd":
+                command = new cd(words[1]);
                 break;
             case "ls":
                 command = new ls();
@@ -24,6 +25,7 @@ public class CommandParser {
                 break;
             case "mkdir":
                 command = new mkdir(words[1]);
+                break;
             case "mkfs":
                 command = new mkfs();
                 break;
@@ -38,24 +40,38 @@ public class CommandParser {
                 command = new rm(words[1]);
                 break;
             case "exit":
-                FileSystem.getInstance().safeExit();
-                command = new printInfo("Exit...\n");
+//                FileSystem.getInstance().safeExit();
+                command = new printInfo("Exit...\n", printInfo.EXIT);
                 break;
 
+
             case "append":
+                break;
             case "help":
-                command = new printInfo(getHelp());
+                command = new printInfo(getHelp(), 0);
                 break;
                 default:
-                    command = new printInfo("Invalid command! You can type \"help\" to get more information.\n");
+                    command = new printInfo("Invalid command! You can type \"help\" to get more information.\n", 0);
         }
 
         return command;
     }
 
     private static String getHelp(){
-        return "help message:\n" +
-                "";
+        return "---------------------------------------------------------------------\n"
+                + "**Help Message**\n"
+                + "ls: show all files in current directory.\n"
+                + "touch [dir]: new a file\n"
+                + "mkdir [dir]: new a dir\n" //
+                + "rm [file/dir]: rm a dir/file\n"
+                + "echo [file] [content]\n"
+                + "mkfs: format and rebuild the file system. Please be careful...\n"
+                + "view [file]: view the content of a file.\n"
+                + "exit: exit the file system\n"
+                + "cd [dir]: change the current dir\n"
+                + "help: print this message again...\n"
+                + "---------------------------------------------------------------------\n"
+                ;
     }
 }
 

@@ -119,8 +119,16 @@ class rm implements Command{
 
 // 打印帮助/出错信息
 class printInfo implements Command{
+//    可能需要进一步做处理的命令
+    final static int FILE_NOT_FOUND = 1;
+    final static int FILE_ALREADY_EXIST = 2;
+    final static int EXIT = 3;
+
     String msg;
-    public printInfo(String info){
+    int type;
+
+    printInfo(String info, int cmdType){
+        type = cmdType;
         msg = info;
     }
 
@@ -130,7 +138,18 @@ class printInfo implements Command{
     }
 }
 
+class cd implements Command{
+    String path;
+    cd(String path){
+        this.path = path;
+    }
 
+    @Override
+    public void excute(Controller controller){
+        INode newDir = PathLookup.pathLookup(controller.curDir, path);
+        controller.curDir = new File(newDir);
+    }
+}
 
 class FileHelper{
     // helper
