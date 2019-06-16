@@ -17,7 +17,7 @@ public class Controller {
 
     // todo: 搞一个UI的member
     FileSystem fs;
-    File curDir; // 用户当前所处的目录
+    public File curDir; // 用户当前所处的目录
     boolean mode = CMD;
 
     public Controller(){
@@ -56,7 +56,7 @@ public class Controller {
         }
 
 //        保存文件系统元信息
-        FileSystem.getInstance().safeExit();
+//        FileSystem.getInstance().safeExit();
 
     }
 

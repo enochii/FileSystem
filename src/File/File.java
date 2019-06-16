@@ -169,8 +169,8 @@ public class File {
         INode.destroyINode(iNode);
     }
 
-//    重命名文件
-    public void renameFile(){
+//    todo: 重命名文件
+    public void renameFile(String string){
 
     }
 }
