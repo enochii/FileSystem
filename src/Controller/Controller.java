@@ -23,7 +23,14 @@ public class Controller {
     public Controller(){
 //        MakeFS.main();
 
-        curDir = new File(FileSystem.getInstance().getRoot());
+        FileSystem fs = FileSystem.getInstance();
+
+        if(fs == null){
+            System.out.println("看起来你是第一次来呢！");
+            new mkfs().excute(this);
+        }else {
+            curDir = new File(fs.getRoot());
+        }
 //        System.out.println("Root: "+ new String(curDir.getINode().filename));
     }
 

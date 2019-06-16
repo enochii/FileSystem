@@ -9,6 +9,7 @@ package File;
 import FileSystem.FileSystem;
 import FileSystem.Config;
 import FileSystem.Block;
+import FileSystem.Helper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,6 @@ public class File {
     INode iNode;
 
     public File(INode inode){
-        assert inode != null;
         iNode = inode;
     }
 
@@ -46,7 +46,7 @@ public class File {
 
 //    获取文件内容
     public String getContent(){
-        assert iNode!=null && iNode.type == 2;
+        Helper.assertion(iNode!=null && iNode.type == FILE, iNode.filename + "is not a File!");
 
 //        content = "";
         StringBuilder stringBuffer = new StringBuilder();
@@ -69,7 +69,7 @@ public class File {
 
 //    获取目录项
     public List<Dirent> getDirents(){
-        assert iNode!=null && iNode.type == 1;
+        Helper.assertion(iNode!=null && iNode.type == DIR, new String(iNode.filename) + " is not a Directory!");
 //        System.out.println(iNode.iNum+" "+new String(iNode.filename));
 
         List<Dirent> dirents = new ArrayList<Dirent>();
@@ -79,7 +79,7 @@ public class File {
 //            System.out.println(i+" "+iNode.indexs[i]);
             INode inode = FileSystem.getInstance().readInode(iNode.indexs[i]);
             if(inode==null)continue;//懒删除的文件？
-            dirents.add(new Dirent(iNode.indexs[i], inode.filename));
+            dirents.add(new Dirent(iNode.indexs[i], inode.filename, inode.type));
         }
 
         return dirents;

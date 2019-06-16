@@ -24,7 +24,9 @@ class ls implements Command{
         if(controller.mode == Controller.CMD){
 //            System.out.println(dirents.size());
             for(int i = 0;i<dirents.size();i++){
-                System.out.print(dirents.get(i).filename + " ");
+                Dirent dirent = dirents.get(i);
+//                在目录后面打印(dir)--
+                System.out.print(dirent.filename + (dirent.type == File.DIR? "(dir) ":" "));
             }
             if(dirents.size()>0){
                 System.out.println();
@@ -55,7 +57,7 @@ class mkdir implements Command{
     @Override
     public void excute(Controller controller){
         assert dirname != null;
-        File.createFile(dirname.getBytes(),File.FILE,controller.curDir.getINode());
+        File.createFile(dirname.getBytes(),File.DIR,controller.curDir.getINode());
     }
 }
 

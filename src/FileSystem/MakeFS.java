@@ -19,6 +19,10 @@ public class MakeFS {
 //        image.createNewFile();
 
         SuperBlock superBlock = new SuperBlock();
+        // 初始化静态成员
+        FileSystem.initFS();
+        FileSystem.superBlock = superBlock;
+
         boolean[] iNodeBitmap = new boolean[superBlock.totalINodeNum];
         boolean[] blockBitmap = new boolean[superBlock.totalBlockNum];
         Arrays.fill(iNodeBitmap, false);
@@ -28,9 +32,7 @@ public class MakeFS {
 //        int[] indexs = new int[Config.NDirect];
 //        byte[] rootName = new String("root").getBytes();
 
-//        初始化静态成员
-        FileSystem.initFS();
-        FileSystem.superBlock = superBlock;
+
 
         INode root = new INode("root".getBytes(), 1, 0, -1000000);
 //        FileSystem fs = FileSystem.getInstance();

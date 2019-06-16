@@ -4,8 +4,9 @@ package File;
 public class Dirent{
     public int iNum;
     public String filename;
+    public int type;// 目录或者文件
 
-    public Dirent(int inum, byte[] filename){
+    public Dirent(int inum, byte[] filename, int type){
         String oriName = new String(filename);
 
         int emptyStart = 0;
@@ -23,10 +24,12 @@ public class Dirent{
 
         this.iNum = inum;
         this.filename = oriName;
+        this.type = type;
     }
 
-    public Dirent(int inum, String filename){
+    public Dirent(int inum, String filename, int type){
         this.iNum = inum;
         this.filename = filename;
+        this.type = type;
     }
 }

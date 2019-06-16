@@ -40,8 +40,15 @@ public class FileSystem {
 //    对外开放的接口
     static public FileSystem getInstance(){
         if(instance == null){
+            initFS();
+            if(needToMkfs()){
+                ImageNotGound = false;
+                return null;
+            }
+
             instance = new FileSystem();
         }
+
         return instance;
     }
 
@@ -51,8 +58,17 @@ public class FileSystem {
     private boolean[] iNodeBitmap;
     private boolean[] blockBitmap;
 
+    private static boolean ImageNotGound = false;
+    public static boolean needToMkfs(){
+        return ImageNotGound;
+    }
+
     static void initFS(){
-        image  = new File("test.txt");
+        image  = new File("fs.iso");
+        if(!image.exists()){
+//            System.out.println("Image no found!");
+            ImageNotGound = true;
+        }
         try {
             storage = new RandomAccessFile(image, "rw");
         } catch (FileNotFoundException e) {
@@ -66,7 +82,7 @@ public class FileSystem {
 //    }
 
     private FileSystem() {
-        initFS();
+//        initFS();
 
 //        位图，0表示空闲，1表示已经被占据
 //
@@ -132,7 +148,12 @@ public class FileSystem {
         Block block = readOneBlock(Config.BlockSize);
         ByteBuffer byteBuffer = block.getByteBuffer();
 
-        sb.totalINodeNum = byteBuffer.getInt();
+        int totalINodeNum = byteBuffer.getInt();
+        if(totalINodeNum <= 0){
+            return sb;
+        }
+
+        sb.totalINodeNum = totalINodeNum;
         sb.totalBlockNum = byteBuffer.getInt();
         sb.allocatedBlockNum = byteBuffer.getInt();
 
@@ -306,6 +327,7 @@ public class FileSystem {
 //    读取特定编号的Inode
     public INode readInode(int inum){
         assert inum < superBlock.totalINodeNum;
+//        System.out.println(inum + "::"+iNodeBitmap.length);
         if(!iNodeBitmap[inum]){
             return null;
         }
