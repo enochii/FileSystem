@@ -27,7 +27,10 @@ public class INode {
 
     public byte[] toBytes(){
         ByteBuffer byteBuffer = ByteBuffer.allocate(Config.InodeSize);
-        byteBuffer.put(filename,0,Config.FileNameLen);
+        byteBuffer.put(filename);
+        if(Config.FileNameLen > filename.length){
+            byteBuffer.put(new byte[Config.FileNameLen - filename.length]);
+        }
         byteBuffer.putInt(type);
         byteBuffer.putInt(iNum);
         for(int i=0;i<Config.NDirect+1;i++){

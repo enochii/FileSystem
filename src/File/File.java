@@ -171,6 +171,7 @@ public class File {
 
 //    todo: 重命名文件
     public void renameFile(String string){
-
+        iNode.filename = string.getBytes();
+        FileSystem.getInstance().writeInode(iNode);
     }
 }

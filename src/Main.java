@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Scanner;
 
 import Controller.Controller;
+import FSView.EditView;
 import FSView.MainView;
 import File.INode;
 import FileSystem.Config;

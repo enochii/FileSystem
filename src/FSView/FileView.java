@@ -17,6 +17,8 @@ import java.awt.event.MouseListener;
 public class FileView extends JPanel {
 //    底层人民
 //    private File file;
+
+
     public Dirent dirent;
     private MainView mainView;
 
@@ -43,6 +45,7 @@ public class FileView extends JPanel {
 
         initIcon();
 
+
 //        文件拥有鼠标监听器
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -51,6 +54,7 @@ public class FileView extends JPanel {
                 // 双击
                 if(me.getClickCount() == 2){
                     System.out.println("一记二连击！");
+                    openFile();
                 }
 
                 // 右键
@@ -63,21 +67,10 @@ public class FileView extends JPanel {
                         // 加菜单项
                         sPopupMenu.addMenuItem("打开(Open)", new CommandActionListener(dirent.iNum, mainView.getController()){
                             @Override
-                            public void actionPerformed(ActionEvent event){
-                                File openFile = new File(FileSystem.getInstance().readInode(inum));
-
-                                int fileType = openFile.getINode().type;
-                                if(fileType == File.DIR){
-//                                    java.util.List<Dirent> direntList = openFile.getDirents();
-                                    controller.curDir = openFile;
-                                    mainView.updateDirents();
-                                }else if(fileType == File.FILE){
-                                    String content = openFile.getContent();
-                                    // todo: 弹出一个EditView????
-                                    System.out.println(content);
-                                }
+                            public void actionPerformed(ActionEvent event) {
+                                openFile();
                             }
-                        });
+                            });
                         sPopupMenu.addMenuItem("删除(Delete)", new CommandActionListener(dirent.iNum, mainView.getController()){
                             @Override
                             public void actionPerformed(ActionEvent event){
@@ -92,8 +85,14 @@ public class FileView extends JPanel {
                             public void actionPerformed(ActionEvent event){
                                 File file = new File(FileSystem.getInstance().readInode(inum));
 
-                                //todo: 弹出EditView...
-                                file.renameFile("..");
+                                String filename = (String)JOptionPane.showInputDialog(mainView,
+                                        "Enter a new name", "Rename",
+                                        JOptionPane.WARNING_MESSAGE);
+                                if(filename == null){
+                                    return;
+                                }
+                                file.renameFile(filename);
+                                mainView.updateDirents();
                             }
                         });
                     }
@@ -102,6 +101,23 @@ public class FileView extends JPanel {
                 }
             }
         });
+    }
+
+    void openFile(){
+        File openFile = new File(FileSystem.getInstance().readInode(dirent.iNum));
+
+        int fileType = openFile.getINode().type;
+        if(fileType == File.DIR){
+//                                    java.util.List<Dirent> direntList = openFile.getDirents();
+            mainView.getController().curDir = openFile;
+            mainView.updateDirents();
+        }else if(fileType == File.FILE){
+            String content = openFile.getContent();
+
+            EditView editView = new EditView(openFile);
+            editView.setVisible(true);
+//            System.out.println(content);
+        }
     }
 
     void test(){

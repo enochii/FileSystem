@@ -17,6 +17,7 @@ import Controller.Command.*;
 
 // 主界面
 public class MainView extends JFrame{
+
     private SPopupMenu sPopupMenu = null;
     private JButton goUp; // 上一级目录
     private JTextField addressField;
@@ -35,6 +36,14 @@ public class MainView extends JFrame{
         goTo = new JButton("👉");
         controller = new Controller();
 
+        goUp.addActionListener(actionEvent -> {
+            goUp();
+        });
+
+        goTo.addActionListener(actionEvent -> {
+            goTo();
+        });
+
 //        contentPanel = new JPanel();
 
         initToolPanel();
@@ -46,8 +55,22 @@ public class MainView extends JFrame{
         updateDirents();
     }
 
+//    返回父目录
+    private void goUp(){
+        controller.curDir = new File(PathLookup.getFather(controller.curDir));
+        updateDirents();
+    }
+
+//    去到地址栏指定的目录
+    private void goTo(){
+        String path = addressField.getText();
+        System.out.println(path);
+        controller.curDir = new File(PathLookup.pathLookup(controller.curDir, path));
+        updateDirents();
+    }
+
 //    初始化主界面的基本设置
-    void initMainView(){
+    private void initMainView(){
         this.setTitle("Sch001's File System!");
         this.setSize(ViewConfig.WINDOW_WIDTH, ViewConfig.WINDOW_HEIGHT);
         this.setResizable(false);
@@ -59,7 +82,7 @@ public class MainView extends JFrame{
 
     }
 
-    void initContentPanel(){
+    private void initContentPanel(){
         // 左侧对齐的流式布局
         contentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         contentPanel.setBounds(0,20, 750 + 0, 1000 + 20);
@@ -68,7 +91,7 @@ public class MainView extends JFrame{
         this.add(contentPanel);
     }
 
-    void initScroll(){
+    private void initScroll(){
         // 移除所有components
         this.contentPanel.removeAll();
 
@@ -147,6 +170,7 @@ public class MainView extends JFrame{
     }
 
     void addRightClickListener(){
+
         contentPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent me) {
@@ -158,8 +182,7 @@ public class MainView extends JFrame{
                     sPopupMenu.addMenuItem("上一级目录(Go Up)", new CommandActionListener(controller){
                         @Override
                         public void actionPerformed(ActionEvent event){
-                            controller.curDir = new File(PathLookup.getFather(controller.curDir));
-                            updateDirents();
+                            goUp();
                         }
                     });
                     sPopupMenu.addMenuItem("格式化(Format!)",new CommandActionListener(controller){
@@ -171,10 +194,44 @@ public class MainView extends JFrame{
                         }
                     });
 
+                    // 新建文件
+                    sPopupMenu.addMenuItem("新建文件(New File)", new CommandActionListener(controller){
+                        @Override
+                        public void actionPerformed(ActionEvent event){
+                            newFile(File.FILE);
+                        }
+                    });
+
+                    sPopupMenu.addMenuItem("新建目录(New Directory)", new CommandActionListener(controller){
+                        @Override
+                        public void actionPerformed(ActionEvent event){
+                            newFile(File.DIR);
+                        }
+                    });
+
                     sPopupMenu.menu.show(me.getComponent(),me.getX(),me.getY());
                 }
 
             }
         });
+    }
+//    新建文件/目录
+    private void newFile(int type){
+        if(type != File.DIR && type != File.FILE){
+            System.err.println("Invalid File Type!");
+        }
+        String fileType = type == File.FILE? "file":"directory";
+
+        String filename = (String)JOptionPane.showInputDialog(this,
+                "Enter your "+ fileType + " name", "New "+ fileType,
+                        JOptionPane.WARNING_MESSAGE);
+        if(filename == null){
+            return;
+        }
+
+        File.createFile(filename.getBytes(), type, controller.curDir.getINode());
+
+        controller.curDir.updateInode();
+        updateDirents();
     }
 }
