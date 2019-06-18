@@ -4,6 +4,7 @@ import Controller.Controller;
 import File.Dirent;
 import Controller.PathLookup;
 import File.File;
+import File.INode;
 import FileSystem.FileSystem;
 import FileSystem.MakeFS;
 import Controller.Command;
@@ -57,7 +58,16 @@ public class MainView extends JFrame{
 
 //    返回父目录
     private void goUp(){
-        controller.curDir = new File(PathLookup.getFather(controller.curDir));
+        // 弹出警告
+        INode father = PathLookup.getFather(controller.curDir);
+        if(father == null){
+            JOptionPane.showMessageDialog(this,
+                    "Already in root directory!", "Warning",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        controller.curDir = new File(father);
         updateDirents();
     }
 
@@ -65,7 +75,15 @@ public class MainView extends JFrame{
     private void goTo(){
         String path = addressField.getText();
         System.out.println(path);
-        controller.curDir = new File(PathLookup.pathLookup(controller.curDir, path));
+
+        INode nextDir = PathLookup.pathLookup(controller.curDir, path);
+        if(nextDir == null){
+            JOptionPane.showMessageDialog(this,
+                    "Directory doesn't exist!", "Warning",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        controller.curDir = new File(nextDir);
         updateDirents();
     }
 
@@ -229,7 +247,13 @@ public class MainView extends JFrame{
             return;
         }
 
-        File.createFile(filename.getBytes(), type, controller.curDir.getINode());
+        INode newinode =  File.createFile(filename.getBytes(), type, controller.curDir.getINode());
+        if(newinode == null){
+            JOptionPane.showMessageDialog(this,
+                    "The name has been used!", "Warning",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         controller.curDir.updateInode();
         updateDirents();

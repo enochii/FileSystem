@@ -10,7 +10,7 @@ import FileSystem.MakeFS;
 
 public class CommandParser {
     public static Command parse(String cmd, Controller controller){
-        String[] words = cmd.split(" ");
+        String[] words = cmd.split(" ",3);
         Command command = null;
 
         switch (words[0]){
@@ -45,7 +45,8 @@ public class CommandParser {
                 break;
 
 
-            case "append":
+            case "rename":
+                command = new rename(words[1], words[2]);
                 break;
             case "help":
                 command = new printInfo(getHelp(), 0);
@@ -69,6 +70,7 @@ public class CommandParser {
                 + "view [file]: view the content of a file.\n"
                 + "exit: exit the file system\n"
                 + "cd [dir]: change the current dir\n"
+                + "rename [file] [newname]: rename file with newname\n"
                 + "help: print this message again...\n"
                 + "---------------------------------------------------------------------\n"
                 ;

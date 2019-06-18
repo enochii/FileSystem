@@ -19,7 +19,7 @@ import File.INode;
 
 // 文件系统布局如下
 /*
-    \ 超级块 | i节点位图 | 磁盘块位图 | i节点数组 | 数据块 |
+    | 留空块 \ 超级块 | i节点位图 | 磁盘块位图 | i节点数组 | 数据块 |
  */
 //这部分填写文件系统在磁盘镜像文件上的逻辑，提供访问数据块/i节点的接口等
 
@@ -52,9 +52,9 @@ public class FileSystem {
         return instance;
     }
 
-//    存储元信息
+//    存储元信息的超级块
     static SuperBlock superBlock;
-
+//    位图
     private boolean[] iNodeBitmap;
     private boolean[] blockBitmap;
 

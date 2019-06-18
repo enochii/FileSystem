@@ -91,12 +91,22 @@ public class File {
 
 //    创建新文件或者文件夹，返回i节点
     public static INode createFile(byte[] filename, int type, int father){
-        // 创建新文件
-        INode child = INode.allocateINode(filename, type, father);
 
         // 把新文件加入父目录
         FileSystem fs = FileSystem.getInstance();
         INode ifa = fs.readInode(father);
+
+        List<Dirent> dirents = new File(ifa).getDirents();
+        for(Dirent dirent: dirents){
+            if(dirent.filename.equals(new String(filename))){
+//                文件重名
+                return null;
+            }
+        }
+
+        // 创建新文件
+        INode child = INode.allocateINode(filename, type, father);
+
         int insertIndex;
         for(insertIndex = 0;insertIndex < Config.NDirect - 1;insertIndex++){
             if(ifa.indexs[insertIndex] == 0)break;

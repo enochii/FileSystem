@@ -27,7 +27,7 @@ public class Controller {
 
         if(fs == null){
             System.out.println("看起来你是第一次来呢！");
-            new mkfs().excute(this);
+            new mkfs().execute(this);
         }else {
             curDir = new File(fs.getRoot());
         }
@@ -42,7 +42,7 @@ public class Controller {
             String cmd = console.readLine();
 
             Command command = CommandParser.parse(cmd, this);
-            command.excute(this);
+            command.execute(this);
 
             curDir.updateInode();
 

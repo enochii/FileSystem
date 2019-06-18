@@ -9,13 +9,13 @@ import FileSystem.MakeFS;
 import File.INode;
 
 public interface Command {
-    public void excute(Controller controller);
+    public void execute(Controller controller);
 }
 
 class ls implements Command{
 
     @Override
-    public void excute(Controller controller){
+    public void execute(Controller controller){
         File dir = controller.curDir;
         assert dir != null;
 
@@ -43,7 +43,7 @@ class touch implements Command{
     }
 
     @Override
-    public void excute(Controller controller){
+    public void execute(Controller controller){
         File.createFile(filename.getBytes(),File.FILE,controller.curDir.getINode());
     }
 }
@@ -55,7 +55,7 @@ class mkdir implements Command{
         this.dirname = dirname;
     }
     @Override
-    public void excute(Controller controller){
+    public void execute(Controller controller){
         assert dirname != null;
         File.createFile(dirname.getBytes(),File.DIR,controller.curDir.getINode());
     }
@@ -63,7 +63,7 @@ class mkdir implements Command{
 
 class mkfs implements Command{
     @Override
-    public void excute(Controller controller){
+    public void execute(Controller controller){
         MakeFS.main();
 //      重置根目录
         controller.curDir = new File(FileSystem.getInstance().getRoot());
@@ -80,7 +80,7 @@ class echo implements Command{
     }
 
     @Override
-    public void excute(Controller controller){
+    public void execute(Controller controller){
         File echoFile = FileHelper.findFile(controller, file);
         echoFile.updateFile(cont);
     }
@@ -93,7 +93,7 @@ class view implements Command{
     }
 
     @Override
-    public void excute(Controller controller){
+    public void execute(Controller controller){
 
         File viewFile = FileHelper.findFile(controller, file);
 //        TEST
@@ -111,7 +111,7 @@ class rm implements Command{
         this.filename = filename;
     }
     @Override
-    public void excute(Controller controller){
+    public void execute(Controller controller){
         File rmFile = FileHelper.findFile(controller, filename);
 
         rmFile.deleteFile();
@@ -135,7 +135,7 @@ class printInfo implements Command{
     }
 
     @Override
-    public void excute(Controller controller){
+    public void execute(Controller controller){
         System.out.print(msg);
     }
 }
@@ -147,9 +147,23 @@ class cd implements Command{
     }
 
     @Override
-    public void excute(Controller controller){
+    public void execute(Controller controller){
         INode newDir = PathLookup.pathLookup(controller.curDir, path);
         controller.curDir = new File(newDir);
+    }
+}
+
+class rename implements Command{
+    String newname;
+    String filename;
+    rename(String filename, String newname){
+        this.filename = filename;
+        this.newname = newname;
+    }
+    @Override
+    public void execute(Controller controller){
+        File renameFile = FileHelper.findFile(controller, filename);
+        renameFile.renameFile(newname);
     }
 }
 

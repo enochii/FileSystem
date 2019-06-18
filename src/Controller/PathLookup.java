@@ -37,8 +37,9 @@ public class PathLookup {
         return null;
     }
 
-//    todo: 这里还少了".."和比较直观的相对路径
-//    './'表示相对路径,'root/xxx/'表示绝对路径.在我们的系统中根目录为root
+//    ".."
+//    "./subdir"和"subdir"均表示相对路径
+//    'root/xxx/'表示绝对路径.在我们的系统中根目录为root
     public static INode pathLookup(File curDir, String _path){
         String[] path = splitPathname(_path);
 //        File startDir = null;
@@ -63,6 +64,10 @@ public class PathLookup {
         assert curDir != null;
         for(int i = startIndex;i<path.length;i++){
             Dirent dirent = lookupInDir(path[i], curDir);
+
+            if(dirent == null){
+                return null;
+            }
             INode inode = FileSystem.getInstance().readInode(dirent.iNum);
 //            文件需作为路径的最后一个分割符出现
             if(inode.type == File.FILE && i != path.length - 1){
@@ -77,7 +82,11 @@ public class PathLookup {
 //    获取父目录
 //    这里一个比较hack的想法是把["..", faInum]存入dirents数组，但是有点...
     public static INode getFather(File curDir){
-        int ifa = curDir.getINode().indexs[Config.NDirect - 1];
+        INode inode = curDir.getINode();
+        if(new String(inode.filename).startsWith("root")){
+            return null;
+        }
+        int ifa = inode.indexs[Config.NDirect - 1];
         return FileSystem.getInstance().readInode(ifa);
     }
 }

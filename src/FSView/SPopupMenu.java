@@ -18,11 +18,11 @@ public class SPopupMenu {
     SPopupMenu(){
 //        selectedFile = file;
         menu = new JPopupMenu();
-        addMenuItem("Test", new CommandActionListener(null){
-            public void actionPerformed(ActionEvent e){
-                System.out.println("我错了");
-            }
-        });
+//        addMenuItem("Test", new CommandActionListener(null){
+//            public void actionPerformed(ActionEvent e){
+//                System.out.println("我错了");
+//            }
+//        });
     }
 
 //    加入一个菜单项

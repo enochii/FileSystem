@@ -9,5 +9,4 @@ public class ViewConfig {
     // 文件图标
     public static final int FILE_ICON_SIZE = 80;
     public static final int FILE_ICON_PANEL_SIZE = 100;
-    public static final Charset CHARSET = Charset.forName("UTF-8");
 }

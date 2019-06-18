@@ -119,13 +119,13 @@ public class EditView extends JFrame implements DocumentListener {
     // 监听文件
     public void insertUpdate(DocumentEvent e) {
         edited = true;
-        System.out.println("插入");
+//        System.out.println("插入");
         setTitle(filename + " ⚫Edited");
     }
 
     public void removeUpdate(DocumentEvent e) {
         edited = true;
-        System.out.println("删除");
+//        System.out.println("删除");
         setTitle(filename + " ⚫Edited");
     }
 
