@@ -43,31 +43,31 @@ java -jar fs.jar
 
 选择进入界面版本。
 
-![overview](img\overview.jpg)
+![overview](img/overview.jpg)
 
 右键点击空白面板，选择格式化、新建文件/目录或回到上一层目录：
 
-![main-right-click](img\main-right-click.jpg)
+![main-right-click](img/main-right-click.jpg)
 
 选择新建文件目录：
 
-![new-dir](img\new-dir.jpg)
+![new-dir](img/new-dir.jpg)
 
 新建目录成功：
 
-![new-dir-success](img\new-dir-success.jpg)
+![new-dir-success](img/new-dir-success.jpg)
 
 新建文件或目录若已经存在同名文件会报错：
 
-![name-used](img\name-used.jpg)
+![name-used](img/name-used.jpg)
 
 右键点击文件,可以选择打开（或者双击打开），进入目录或者编辑文件，取决于该文档是文件还是文件夹；或者选择删除、重命名。
 
-![file-right-click](img\file-right-click.jpg)
+![file-right-click](img/file-right-click.jpg)
 
 双击或者右键点击文件进入编辑界面：
 
-![edit-view](img\edit-view.jpg)
+![edit-view](img/edit-view.jpg)
 
 退出提醒是否保存：
 
