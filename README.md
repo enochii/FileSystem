@@ -43,47 +43,29 @@ java -jar fs.jar
 
 选择进入界面版本。
 
-![overview](img\overview.jpg)
+![overview](img/overview.jpg)
 
 右键点击空白面板，选择格式化、新建文件/目录或回到上一层目录：
 
-![main-right-click](img\main-right-click.jpg)
+![main-right-click](img/main-right-click.jpg)
 
 选择新建文件目录：
 
-![new-dir](img\new-dir.jpg)
-
-新建目录成功：
-
-![new-dir-success](img\new-dir-success.jpg)
-
-新建文件或目录若已经存在同名文件会报错：
-
-![name-used](img\name-used.jpg)
+![new-dir](img/new-dir.jpg)
 
 右键点击文件,可以选择打开（或者双击打开），进入目录或者编辑文件，取决于该文档是文件还是文件夹；或者选择删除、重命名。
 
-![file-right-click](img\file-right-click.jpg)
+![file-right-click](img/file-right-click.jpg)
 
 双击或者右键点击文件进入编辑界面：
 
-![edit-view](img\edit-view.jpg)
-
-退出提醒是否保存：
-
-![save](img/save-edit.jpg)
+![edit-view](img/edit-view.jpg)
 
 上方还存在工具栏，分别是回到上级目录，地址输入框和前进按钮：
 
 ![tool-panel](img/tool-panel.jpg)
 
-你可以在中间的地址栏输入想去的路径，支持相对路径和绝对路径，当路径不存在时候会提示报错：
-
-![dir-not-exist](img/dir-not-exist.jpg)
-
-当点击回退到父目录时，若当前已经在根目录，提示报错：
-
-![in-root](img/already-in-root.jpg)
+你可以在中间的地址栏输入想去的路径，支持相对路径和绝对路径，当路径不存在时候会提示报错。
 
 ### 命令行版本
 
@@ -354,3 +336,7 @@ public class FileView extends JPanel {
 ```
 
 当用户第一次右键单击才对弹出菜单进行实例化，这样对没被用户点击的目录项的弹出菜单就不会被创建。
+
+### 关于JTextPane
+
+在编辑文本时有时会出现`backspace`无效（无法删除文本）的情况，这时候可以通过用鼠标调整光标的位置并尝试删除最后一个字符之前的内容，可以看到前面的字符是可以删除的，这说明功能实现应该没有问题。这可能是和`JTextPane`本身存在的一点bug，可以看看[这个链接](https://github.com/atarw/material-ui-swing/issues/33)。
